@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -12,15 +13,23 @@ namespace MenschensKinder
     /// </summary>
     public partial class GamePage : Page
     {
+        private IEnumerable<Ellipse> ellipses;
+        private GameBoard boardManager;
+
         public GamePage()
         {
             InitializeComponent();
+            boardManager = new GameBoard();
             InitGameboard();
+            Coordinate2D coordinates = boardManager.ReturnPosition(ellipses.LastOrDefault());
+            //MessageBox.Show(String.Format("X: {0}, Y:{1}", coordinates.X.ToString(), coordinates.Y.ToString())); 
         }
+
+
 
         private void InitGameboard()
         {
-            IEnumerable<Ellipse> ellipses = CreateField(11);
+            ellipses = CreateField(11);
             foreach (Ellipse ellipse in ellipses)
                 grid.Children.Add(ellipse);   
         }
@@ -78,6 +87,26 @@ namespace MenschensKinder
 
                     Grid.SetColumn(ellipse, i);
                     Grid.SetRow(ellipse, j);
+
+                    boardManager.AddField(ellipse, i, j);
+
+#if DEBUG
+
+                    TextBlock txtBlock = new TextBlock()
+                    {
+                        TextAlignment = TextAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Text = String.Format(boardManager.ReturnField(ellipse).ToString()),
+
+                    };
+
+                    Grid.SetColumn(txtBlock, i);
+                    Grid.SetRow(txtBlock, j);
+
+                    grid.Children.Add(txtBlock);
+#endif
+
                     yield return ellipse;
                 }
             }
