@@ -80,6 +80,8 @@ namespace MenschensKinder
                             VerticalAlignment = VerticalAlignment.Center,
                         };
 
+                        dice.Click += boardManager.RollDice;
+
                         Grid.SetColumn(dice, i);
                         Grid.SetRow(dice, j);
                         grid.Children.Add(dice);

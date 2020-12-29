@@ -42,5 +42,17 @@ namespace MenschensKinder
             return null;
         }
 
+        internal void RollDice(object sender, RoutedEventArgs e)
+        {
+            var rand = new Random();
+            int dice1 = rand.Next(1, 6);
+            int dice2 = rand.Next(1, 6);
+
+            if(dice1 == dice2)
+                MessageBox.Show(String.Format("{0}, {1}, PASCH!", dice1.ToString(), dice2.ToString()));
+            else
+                MessageBox.Show(String.Format("{0}, {1}", dice1.ToString(), dice2.ToString()));
+
+        }
     }
 }
