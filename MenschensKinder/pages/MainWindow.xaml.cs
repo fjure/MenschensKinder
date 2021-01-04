@@ -22,6 +22,10 @@ namespace MenschensKinder
     {
         public MainWindow()
         {
+            /// <summary>
+            /// Startpunkt des Projekts. Navigiert das Frame zur Menüpage.
+            /// </summary>
+
             InitializeComponent();
             MenuPage mp = new MenuPage();
             mainFrm.Navigate(mp);

@@ -10,7 +10,7 @@
       ShowsNavigationUI="False" Background="LightGoldenrodYellow">
 
     <Page.Resources>
-        <Image x:Key="DiceBtn" Source="dice.png" Focusable="False"/>
+        <Image x:Key="DiceBtn" Source="/img/dice.png" Focusable="False"/>
         <Style x:Key="FieldEllipse" TargetType="{x:Type Ellipse}">
             <Setter Property="Stroke" Value="Black"/>
         </Style>
