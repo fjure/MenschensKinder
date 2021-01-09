@@ -8,13 +8,6 @@
         Title="MenschensKinder" Height="700" Width="900" ResizeMode="NoResize">
 
     <Window.Resources>
-
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-        
         
     </Window.Resources>
     
