@@ -1,8 +1,10 @@
-﻿using System;
+﻿using MenschensKinder.data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MenschensKinder
 {
@@ -13,7 +15,7 @@ namespace MenschensKinder
     {
         private bool hasInit;
 
-        public string Color { get; }
+        public PlayerColor Color { get; }
         // Dictionary um jeder Integer ID einer Figure zuzordnen. (1 -> Figure1, 2 -> Figure2, usw.)
         private IDictionary<int, Figure> figures = new Dictionary<int, Figure>();
         public bool IsInit {
@@ -25,7 +27,7 @@ namespace MenschensKinder
         /// Konstruiere ein Player Objekt mit der übergebenen Color
         /// </summary>
         /// <param name="color">Die gewählte Farbe</param>
-        public Player(string color)
+        public Player(PlayerColor color)
         {
             this.Color = color;
             ConstructFigures(color);
@@ -35,35 +37,67 @@ namespace MenschensKinder
         /// Konstruiere die Figuren des Spielers. Dies ist die Erstinitialisierung
         /// </summary>
         /// <param name="color">Die Farbe des Spielers, um zu entscheiden wo die Erstkoordinaten der Figuren ist</param>
-        private void ConstructFigures(string color)
+        private void ConstructFigures(PlayerColor color)
         {
-            for(int i = 1; i <= 4; i++)
+            // Wandel die Liste mit den Startkoordinaten in ein Array um, da die Elemente in der Zählschleife leichter indexierbar ist.
+            Coordinate2D[] coordinate = DetermineStartCoordinatesByColor(color).ToArray();
+            if(!hasInit)
             {
-                // Füge dem Dictionary jeweils eine ID und eine Figur hinzu.
-                figures.Add(i, new Figure(color));
-                // Überprüfe ob dies die Erstinitialisierung ist.
-                if(!IsInit)
+                for(int i = 1; i <= 4; i++)
                 {
-                    // Erhalte die jeweilige Figure für die Zählvariable i, also Figure 1 für i=1 usw.
-                    var figure = ReturnFigure(i);
-                    switch(i)
-                    {
-                        // Weise den jeweiligen Figuren ihre Koordinaten zu.
-                        // TODO: Koordinaten logischerweise von Farbe abhängig machen.
-                        case 1:
-                            figure.FigureCoordinate = new Coordinate2D(0, 0);
-                            break;
-                        case 2:
-                            figure.FigureCoordinate = new Coordinate2D(0, 1);
-                            break;
-                        case 3:
-                            figure.FigureCoordinate = new Coordinate2D(1, 0);
-                            break;
-                        case 4:
-                            figure.FigureCoordinate = new Coordinate2D(1, 1);
-                            break;
-                    }
+                    figures.Add(i, new Figure(color));
+                    Figure figure = ReturnFigure(i);
+                    figure.FigureCoordinate = coordinate[i - 1];
                 }
+            }
+        }
+
+        /// <summary>
+        /// Entscheidet anhand der Spielerfarbe welche Startkoordinaten die Figuren haben sollen
+        /// </summary>
+        /// <param name="color">Gewählte Spielerfarbe</param>
+        /// <returns>Eine Liste mit den Startkoordinaten</returns>
+        private List<Coordinate2D> DetermineStartCoordinatesByColor(PlayerColor color)
+        {
+            List<Coordinate2D> startCoordinates = new List<Coordinate2D>();
+            if(color == PlayerColor.RED)
+            {
+                startCoordinates.Add(new Coordinate2D(0, 0));
+                startCoordinates.Add(new Coordinate2D(0, 1));
+                startCoordinates.Add(new Coordinate2D(1, 0));
+                startCoordinates.Add(new Coordinate2D(1, 1));
+                return startCoordinates;
+            }
+
+            if(color == PlayerColor.BLUE)
+            {
+                startCoordinates.Add(new Coordinate2D(9, 0));
+                startCoordinates.Add(new Coordinate2D(9, 1));
+                startCoordinates.Add(new Coordinate2D(10, 0));
+                startCoordinates.Add(new Coordinate2D(10, 1));
+                return startCoordinates;
+            }
+
+            if (color == PlayerColor.GREEN)
+            {
+                startCoordinates.Add(new Coordinate2D(0, 9));
+                startCoordinates.Add(new Coordinate2D(0, 10));
+                startCoordinates.Add(new Coordinate2D(1, 9));
+                startCoordinates.Add(new Coordinate2D(1, 10));
+                return startCoordinates;
+            }
+
+            if (color == PlayerColor.YELLOW)
+            {
+                startCoordinates.Add(new Coordinate2D(9, 9));
+                startCoordinates.Add(new Coordinate2D(9, 10));
+                startCoordinates.Add(new Coordinate2D(10, 9));
+                startCoordinates.Add(new Coordinate2D(10, 10));
+                return startCoordinates;
+            }
+            else
+            {
+                return null;
             }
         }
 

@@ -1,9 +1,11 @@
-﻿using System;
+﻿using MenschensKinder.data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace MenschensKinder
@@ -25,7 +27,7 @@ namespace MenschensKinder
         /// Konstruktor der Klasse GamePage. Initialisiert alle nötigen UI-Komponenten
         /// </summary>
         /// <param name="color">Empfängt die ausgewählte Farbe aus der ColorPage und weist diese dem Player zu.</param>
-        public GamePage(string color)
+        public GamePage(PlayerColor color)
         {
             InitializeComponent();
             // Instanziiere Objekte
@@ -63,11 +65,12 @@ namespace MenschensKinder
                 foreach(Figure figure in figures)
                 {
                     // Weise jeder Figur eine Image-Source und eine Position im Grid zu.
-                    var image = new Image { Source = figure.Drawing.ImageSource};
+                    Button figBtn = figure.FigureButton;
+                    //var image = new Image { Source = figure.Drawing.ImageSource};
                     // Die Position im Grid entspricht der Erstposition der Figuren.
-                    Grid.SetColumn(image, figure.FigureCoordinate.X);
-                    Grid.SetRow(image, figure.FigureCoordinate.Y);
-                    grid.Children.Add(image);
+                    Grid.SetColumn(figBtn, figure.FigureCoordinate.X);
+                    Grid.SetRow(figBtn, figure.FigureCoordinate.Y);
+                    grid.Children.Add(figBtn);
                 }
             }
             // Debug-Anweisung
@@ -87,7 +90,7 @@ namespace MenschensKinder
         {
             // Weise den UI-Elementen ihre zugehörigen Styles (Designs) zu.
             Style ellipseStyle = this.FindResource("FieldEllipse") as Style;
-            Style diceBtnStyle = this.FindResource("DiceBtnStyle") as Style;
+            Style diceBtnStyle = App.Current.MainWindow.FindResource("NoHoverButton") as Style;
             for (int i = 0; i < number; i++)
             {
                 // Weise dem Grid dynamisch Spalten und Zeilen zu. Die jeweilge Breite und Höhe wird abhängig von der Gridgröße gemacht.
@@ -131,11 +134,10 @@ namespace MenschensKinder
                         Button dice = new Button()
                         {
                             // Weise dem Button seinen XAML-Style zu.
+                            Content = new Image() { Source = new BitmapImage(new Uri("/img/dice.png", UriKind.RelativeOrAbsolute)) },
+                            Background = Brushes.Transparent,
+                            BorderThickness = new Thickness(0.0),
                             Style = diceBtnStyle,
-                            FontSize = 36,
-                            //Content = "Würfel",
-                            HorizontalAlignment = HorizontalAlignment.Center,
-                            VerticalAlignment = VerticalAlignment.Center,
                         };
                         // Click-Handler für den Würfel-Button
                         dice.Click += boardManager.RollDice;

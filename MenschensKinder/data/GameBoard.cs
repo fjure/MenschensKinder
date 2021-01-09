@@ -78,9 +78,9 @@ namespace MenschensKinder
 
             // Überprüfe ob die Würfel-Ergebnisse gleich sind.
             if(dice1 == dice2)
-                MessageBox.Show(String.Format("{0}, {1}, PASCH!", dice1.ToString(), dice2.ToString()));
+                MessageBox.Show(String.Format("Würfel: {0}, {1}, PASCH!", dice1.ToString(), dice2.ToString()));
             else
-                MessageBox.Show(String.Format("{0}, {1}", dice1.ToString(), dice2.ToString()));
+                MessageBox.Show(String.Format("Würfel: {0}, {1}", dice1.ToString(), dice2.ToString()));
 
         }
     }

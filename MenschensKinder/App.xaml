@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:MenschensKinder"
              StartupUri="pages/MainWindow.xaml">
     <Application.Resources>
-        
+        <ResourceDictionary Source="/resource/ButtonDictionary.xaml"/>
     </Application.Resources>
 </Application>

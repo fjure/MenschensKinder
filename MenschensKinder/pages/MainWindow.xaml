@@ -6,6 +6,19 @@
         xmlns:local="clr-namespace:MenschensKinder"
         mc:Ignorable="d"
         Title="MenschensKinder" Height="700" Width="900" ResizeMode="NoResize">
+
+    <Window.Resources>
+
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        
+        
+    </Window.Resources>
+    
+    
     <Grid>
         <Frame x:Name="mainFrm" NavigationUIVisibility="Hidden"/>
     </Grid>

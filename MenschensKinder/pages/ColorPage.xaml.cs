@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MenschensKinder.data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,25 +35,29 @@ namespace MenschensKinder
         {
             // Extrahiere den Text des jeweiligen Knopfes, und entscheide am Text welche Farbe der Spieler wählt.
             var btnText = (sender as Button).Content;
-            string color = "";
+            var color = new PlayerColor();
             switch (btnText) {
-                case "ROT":
-                    color = "red";
+                case "Rot":
+                    color = PlayerColor.RED;
                     break;
-                case "BLAU":
-                    color = "blue";
+                case "Blau":
+                    color = PlayerColor.BLUE;
                     break;
-                case "GRÜN":
-                    color = "green";
+                case "Grün":
+                    color = PlayerColor.GREEN;
                     break;
-                case "GELB":
-                    color = "yellow";
+                case "Gelb":
+                    color = PlayerColor.YELLOW;
                     break;
             }
 
             // Navigiere zum finalen Spielbrett
-            GamePage gp = new GamePage(color);
-            this.NavigationService.Navigate(gp);
+            this.NavigationService.Navigate(new GamePage(color));
+        }
+
+        private void BackBtn(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new MenuPage());
         }
 
     }
