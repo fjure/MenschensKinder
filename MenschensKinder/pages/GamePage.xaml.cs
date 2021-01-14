@@ -22,6 +22,13 @@ namespace MenschensKinder
         private readonly GameBoard boardManager;
         // Deklariere ein Objekt der Klasse Player um diesen zeichnen zu können
         private readonly Player player;
+        // Deklariere eine Liste mit Computergegenern
+        private readonly List<Player> kiplayer;
+        // Deklariere eine Liste mit dem Spieler und den Computergegnern
+        private readonly List<Player> allPlayers;
+        // Würfel Button
+        private Button diceButton;
+        
 
         /// <summary>
         /// Konstruktor der Klasse GamePage. Initialisiert alle nötigen UI-Komponenten
@@ -33,12 +40,86 @@ namespace MenschensKinder
             // Instanziiere Objekte
             boardManager = new GameBoard();
             player = new Player(color);
+            kiplayer = new List<Player>();
+            allPlayers = new List<Player>();
             // Zeichne die UI-Elemente
             InitGameboard();
             DrawPlayer();
+            DrawKI();
+            GameLoop();
 #if DEBUG
             Coordinate2D coordinates = boardManager.ReturnPosition(ellipses.LastOrDefault());
 #endif
+        }
+
+        private void GameLoop()
+        {
+            allPlayers.Add(player);
+            foreach(Player ki in kiplayer)
+            {
+                allPlayers.Add(ki);
+            }
+
+            foreach(Player players in allPlayers)
+            {
+                foreach(Figure figure in players.ReturnFigures())
+                {
+                    figure.FigureClickedEvent += OnFigureClicked;
+                }
+            }
+            boardManager.DiceRolledEvent += OnDiceRolled;
+            
+        }
+
+        public void OnDiceRolled()
+        {
+            int leftTurns = player.Turns;
+            //MessageBox.Show(leftTurns.ToString());
+            if (leftTurns > 1)
+            {
+                if(boardManager.RolledDice == 6)
+                {
+                    player.EnableFigures();
+                }
+                //player.Turns -= 1;
+            }
+            else
+            {
+                //diceButton.IsEnabled = false;
+            }
+        }
+
+        public void OnFigureClicked(Object sender, bool test)
+        {
+            Figure figSend = (Figure)sender;
+            
+            GameField currentField = boardManager.ReturnField(figSend.FigureCoordinate);
+            
+            GameField newField = boardManager.DetermineNextField(figSend, currentField);
+
+            figSend.LastGameField = currentField;
+            figSend.CurrentGameField = newField;
+#if DEBUG
+            /*MessageBox.Show("Clicked on: " + figSend.FigureCoordinate.ToString());
+            MessageBox.Show("Aktuelles Feld Posi: " + currentField.Coordinates.ToString());
+            MessageBox.Show("Neues berechnetes Feld: " + newField.Coordinates.ToString());
+            MessageBox.Show("Ich stand auf: " + figSend.LastGameField.Coordinates.ToString());
+            MessageBox.Show("Jetzt stehe ich auf: " + figSend.CurrentGameField.Coordinates.ToString());*/
+#endif
+            try
+            {
+                figSend.FigureCoordinate = newField.Coordinates;
+            } 
+            catch(ArgumentNullException)
+            {
+                MessageBox.Show("Neue Position ist nicht berechenbar!");
+            }
+
+            foreach (Figure figures in player.ReturnFigures())
+            {
+                grid.Children.Remove(figures.FigureButton);
+                DrawButtonForFigure(figures);
+            }
         }
 
         /// <summary>
@@ -64,13 +145,9 @@ namespace MenschensKinder
                 var figures = player.ReturnFigures();
                 foreach(Figure figure in figures)
                 {
-                    // Weise jeder Figur eine Image-Source und eine Position im Grid zu.
-                    Button figBtn = figure.FigureButton;
-                    //var image = new Image { Source = figure.Drawing.ImageSource};
-                    // Die Position im Grid entspricht der Erstposition der Figuren.
-                    Grid.SetColumn(figBtn, figure.FigureCoordinate.X);
-                    Grid.SetRow(figBtn, figure.FigureCoordinate.Y);
-                    grid.Children.Add(figBtn);
+                    DrawButtonForFigure(figure);
+                    figure.CurrentGameField = boardManager.ReturnField(figure.FigureCoordinate);
+                    figure.LastGameField = figure.CurrentGameField;
                 }
             }
             // Debug-Anweisung
@@ -78,6 +155,43 @@ namespace MenschensKinder
             {
                 MessageBox.Show("Wurde schon geplaced");
             }
+        }
+
+        /// <summary>
+        /// Sorgt dafür, die KISpieler an ihrer Erstposition zu zeichnen.
+        /// </summary>
+        private void DrawKI()
+        {
+            // Iteriere durch jede einzelne verfügbare Spielerfarbe
+            foreach (PlayerColor colors in Enum.GetValues(typeof(PlayerColor)))
+            {
+                // Füge anhand der vom Spieler gewählten Farbe alle anderen Farben als KIPlayer hinzu
+                if (colors != player.Color)
+                {
+                    kiplayer.Add(new Player(colors));
+                }
+            }
+            // Zeichne für jeden Spieler seine 4 Figuren
+            foreach (Player ki in kiplayer)
+            {
+                var figures = ki.ReturnFigures();
+                foreach (Figure kifigure in figures)
+                {
+                    DrawButtonForFigure(kifigure);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Zeichnet den jeweiligen Button an der Position der Player Figure
+        /// </summary>
+        /// <param name="figure">Die Figur für welche der Button gezeichnet werden soll</param>
+        private void DrawButtonForFigure(Figure figure)
+        {
+            Button figBtn = figure.FigureButton;
+            Grid.SetColumn(figBtn, figure.FigureCoordinate.X);
+            Grid.SetRow(figBtn, figure.FigureCoordinate.Y);
+            grid.Children.Add(figBtn);
         }
 
         /// <summary>
@@ -131,7 +245,7 @@ namespace MenschensKinder
                     // Überprüfe die Position der For-Schleifen, um den Würfel-Button zu positionieren.
                     if (i == 5 && j == 5)
                     {
-                        Button dice = new Button()
+                        diceButton = new Button()
                         {
                             // Weise dem Button seinen XAML-Style zu.
                             Content = new Image() { Source = new BitmapImage(new Uri("/img/dice.png", UriKind.RelativeOrAbsolute)) },
@@ -140,12 +254,12 @@ namespace MenschensKinder
                             Style = diceBtnStyle,
                         };
                         // Click-Handler für den Würfel-Button
-                        dice.Click += boardManager.RollDice;
+                        diceButton.Click += boardManager.RollDice;
 
                         // Füge den Würfel-Button dem Grid hinzu
-                        Grid.SetColumn(dice, i);
-                        Grid.SetRow(dice, j);
-                        grid.Children.Add(dice);
+                        Grid.SetColumn(diceButton, i);
+                        Grid.SetRow(diceButton, j);
+                        grid.Children.Add(diceButton);
                     }
 
                     // Setze die Positionen für die jeweiligen Ellipsen.

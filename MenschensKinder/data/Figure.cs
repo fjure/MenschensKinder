@@ -17,9 +17,14 @@ namespace MenschensKinder
     class Figure
     {
         public Coordinate2D FigureCoordinate { get; set; }
-        private PlayerColor color;
+        public PlayerColor Color { get; set; }
+        public string HexColor { get; set; }
         private readonly Style figureBtnStyle = App.Current.MainWindow.FindResource("NoHoverButton") as Style;
         public Button FigureButton { get; }
+        public GameField LastGameField { get; set; }
+        public GameField CurrentGameField { get; set; }
+
+        public event EventHandler<bool> FigureClickedEvent;
 
         /// <summary>
         /// Konstruiere ein ImageDrawing abhängig von der übergebenen Farbe.
@@ -27,7 +32,8 @@ namespace MenschensKinder
         /// <param name="color">Die vom Spieler ausgewählte Farbe</param>
         public Figure(PlayerColor color)
         {
-            this.color = color;
+            this.Color = color;
+            HexColor = ColorToHex(Color);
             // TODO: Das ImageSource soll abhängig von der Farbe sein.
             FigureButton = new Button
             {
@@ -70,6 +76,20 @@ namespace MenschensKinder
                 return null;
             }
         }
+
+        private string ColorToHex(PlayerColor color)
+        {
+            if (color == PlayerColor.RED)
+                return "#FFFF0000";
+            else if (color == PlayerColor.BLUE)
+                return "#FF0000FF";
+            else if (color == PlayerColor.GREEN)
+                return "#FF00FF00";
+            else if (color == PlayerColor.YELLOW)
+                return "#FFFFFF00";
+            else
+                return "#FFFFFFFF";
+        }
         
         /// <summary>
         /// Button Handler um auf Klick auf die Figur zu reagieren
@@ -79,7 +99,9 @@ namespace MenschensKinder
         internal void FigureClicked(Object sender, RoutedEventArgs e)
         {
             // TODO: Anhand der ausgewählten Figur entscheiden, welche Figur bewegt wird
-            MessageBox.Show(this.FigureCoordinate.ToString());
+            //this.FigureCoordinate = DetermineNextPosition(this);
+            //MessageBox.Show(this.FigureCoordinate.ToString());
+            FigureClickedEvent?.Invoke(this, true);
         }
 
     }
