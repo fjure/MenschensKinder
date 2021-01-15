@@ -14,6 +14,7 @@ namespace MenschensKinder
     {
         // Dictionary um der Ellipse ein GameField zuzuweisen.
         private readonly IDictionary<Ellipse, GameField> gameField = new Dictionary<Ellipse, GameField>();
+        private readonly List<Player> allPlayer;
 
         public event Action DiceRolledEvent;
 
@@ -22,6 +23,11 @@ namespace MenschensKinder
         {
             get => rolledDice;
             set => this.rolledDice = value;
+        }
+
+        public GameBoard(List<Player> player)
+        {
+            allPlayer = player;
         }
 
         /// <summary>
@@ -91,9 +97,44 @@ namespace MenschensKinder
             return null;
         }
 
+        private bool CanKick(Figure kicker, GameField field)
+        {
+            if (field.IsTaken)
+            {
+                Figure figureOnField = ReturnFigureForGameField(field);
+                if(figureOnField.FigureCoordinate.Equals(field.Coordinates))
+                {
+                    return true;
+                }
+            }
+            return false;     
+        }
+
+        private void Kick(Figure kicker, Figure figureOnField ,GameField field)
+        {
+            figureOnField.FigureCoordinate = figureOnField.StartCoordinate;
+            kicker.FigureCoordinate = field.Coordinates;
+            kicker.CurrentGameField = field;
+        }
+
+        private Figure ReturnFigureForGameField(GameField field)
+        {
+            foreach(Player player in allPlayer)
+            {
+                foreach(Figure figure in player.ReturnFigures())
+                {
+                    if(figure.FigureCoordinate.Equals(field.Coordinates))
+                    {
+                        return figure;
+                    }
+                }
+            }
+            return null;
+        }
+
         public GameField DetermineNextField(Figure figure, GameField currentField)
         {
-            GameField nextField;
+            GameField nextField = currentField;
             List<GameField> fieldsAround = ScanFieldsAround(figure);
             if (currentField.FieldType == GameFieldType.HOUSE)
             {
@@ -101,72 +142,14 @@ namespace MenschensKinder
                 {
                     if (allFields.Color.ToString().Equals(figure.HexColor) && allFields.FieldType == GameFieldType.STARTFIELD)
                     {
-                        nextField = allFields;
-                        currentField.IsTaken = false;
-                        nextField.IsTaken = true;
-                        return nextField;
-                    }
-                }
-            }
-            else if (currentField.FieldType == GameFieldType.STARTFIELD)
-            {
-
-                foreach (GameField fields in fieldsAround)
-                {
-                    if ((fields.Coordinates.X != figure.LastGameField.Coordinates.X || fields.Coordinates.Y != figure.LastGameField.Coordinates.Y)
-                        && (fields.FieldType != GameFieldType.ENDFIELD && fields.FieldType != GameFieldType.BANK)
-                        && fields.IsVisible == Visibility.Visible)
-                    {
-                        //MessageBox.Show("Es gibt so ein Feld!");
-                        nextField = fields;
-                        currentField.IsTaken = false;
-                        nextField.IsTaken = true;
-                        return nextField;
-                    }
-                }
-
-            }
-            else if (currentField.FieldType == GameFieldType.FIELD)
-            {
-                foreach (GameField fields in fieldsAround)
-                {
-                    //MessageBox.Show(fields.Coordinates.ToString());
-                    if ((fields.Coordinates.X != figure.LastGameField.Coordinates.X || fields.Coordinates.Y != figure.LastGameField.Coordinates.Y)
-                        && (fields.FieldType != GameFieldType.HOUSE && fields.FieldType != GameFieldType.BANK)
-                        && fields.IsVisible == Visibility.Visible)
-                    {
-                        //MessageBox.Show("Es gibt so ein Feld!");
-                        nextField = fields;
-                        currentField.IsTaken = false;
-                        nextField.IsTaken = true;
-                        return nextField;
-                    }
-                }
-
-            }
-            else if (currentField.FieldType == GameFieldType.ENDFIELD)
-            {
-                foreach (GameField fields in fieldsAround)
-                {
-                    if (fields.Color.ToString().Equals(figure.HexColor) && fields.FieldType == GameFieldType.BANK)
-                    {
-                        nextField = fields;
-                        currentField.IsTaken = false;
-                        nextField.IsTaken = true;
-                        return nextField;
-                    }
-                    else
-                    {
-                        if ((fields.Coordinates.X != figure.LastGameField.Coordinates.X || fields.Coordinates.Y != figure.LastGameField.Coordinates.Y)
-                        && (fields.FieldType != GameFieldType.HOUSE && fields.FieldType != GameFieldType.BANK)
-                        && (fields.FieldType == GameFieldType.STARTFIELD && !fields.Color.ToString().Equals(figure.HexColor))
-                        && fields.IsVisible == Visibility.Visible)
+                        if(allFields.IsTaken)
                         {
-                            nextField = fields;
-                            currentField.IsTaken = false;
-                            nextField.IsTaken = true;
-                            return nextField;
+                            if(CanKick(figure, allFields))
+                            {
+                                Kick(figure, ReturnFigureForGameField(allFields), allFields);
+                            }
                         }
+                        nextField = allFields;
                     }
                 }
             }
@@ -174,11 +157,9 @@ namespace MenschensKinder
             {
                 foreach (GameField fields in fieldsAround)
                 {
-                    //MessageBox.Show("Feld im Umfeld: " + fields.Coordinates.ToString());
-                    //MessageBox.Show((fields.FieldType == GameFieldType.BANK).ToString());
-                    if (fields.Color.ToString().Equals(figure.HexColor) 
-                        && (fields.FieldType == GameFieldType.BANK) 
-                        && (fields.Coordinates.X != figure.LastGameField.Coordinates.X || fields.Coordinates.Y != figure.LastGameField.Coordinates.Y)
+                    if (fields.Color.ToString().Equals(figure.HexColor)
+                        && (fields.FieldType == GameFieldType.BANK)
+                        && !fields.Coordinates.Equals(figure.LastGameField.Coordinates)
                         && (fields.IsTaken == false))
                     {
                         nextField = fields;
@@ -188,9 +169,67 @@ namespace MenschensKinder
                     }
                 }
                 figure.FigureButton.IsEnabled = false;
-
             }
-            return currentField;
+            else if(currentField.FieldType != GameFieldType.HOUSE)
+            {
+                foreach (GameField fields in fieldsAround)
+                {
+                    if(currentField.FieldType == GameFieldType.STARTFIELD)
+                    {
+                        if (!fields.Coordinates.Equals(figure.LastGameField.Coordinates)
+                        && (fields.FieldType != GameFieldType.ENDFIELD && fields.FieldType != GameFieldType.BANK)
+                        && fields.IsVisible)
+                        {
+                            if (CanKick(figure, fields))
+                            {
+                                Kick(figure, ReturnFigureForGameField(fields), fields);
+                            }
+                            nextField = fields;
+                        }
+                    }
+                    else if(currentField.FieldType == GameFieldType.FIELD)
+                    {
+                        if (!fields.Coordinates.Equals(figure.LastGameField.Coordinates)
+                        && (fields.FieldType != GameFieldType.HOUSE && fields.FieldType != GameFieldType.BANK)
+                        && fields.IsVisible)
+                        {
+                            if(CanKick(figure, fields))
+                            {
+                                Kick(figure, ReturnFigureForGameField(fields), fields);
+                            }
+                            nextField = fields;
+                        }
+                    }
+                    else if(currentField.FieldType == GameFieldType.ENDFIELD)
+                    {
+                        if (fields.Color.ToString().Equals(figure.HexColor) && fields.FieldType == GameFieldType.BANK)
+                        {
+                            if (CanKick(figure, fields))
+                            {
+                                Kick(figure, ReturnFigureForGameField(fields), fields);
+                            }
+                            nextField = fields;
+                        }
+                        else
+                        {
+                            if (!fields.Coordinates.Equals(figure.LastGameField.Coordinates)
+                            && (fields.FieldType != GameFieldType.HOUSE && fields.FieldType != GameFieldType.BANK)
+                            && (fields.FieldType == GameFieldType.STARTFIELD && !fields.Color.ToString().Equals(figure.HexColor))
+                            && fields.IsVisible)
+                            {
+                                if (CanKick(figure, fields))
+                                {
+                                    Kick(figure, ReturnFigureForGameField(fields), fields);
+                                }
+                                nextField = fields;
+                            }
+                        }
+                    }
+                }
+            }
+            currentField.IsTaken = false;
+            nextField.IsTaken = true;
+            return nextField;
         }
 
         private List<GameField> ScanFieldsAround(Figure figure)

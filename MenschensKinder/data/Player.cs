@@ -18,6 +18,7 @@ namespace MenschensKinder
         public PlayerColor Color { get; }
         // Dictionary um jeder Integer ID einer Figure zuzordnen. (1 -> Figure1, 2 -> Figure2, usw.)
         private readonly IDictionary<int, Figure> figures = new Dictionary<int, Figure>();
+        public List<Coordinate2D> StartCoordinates { get => DetermineStartCoordinatesByColor(this.Color); } 
         public bool IsInit {
             get => this.hasInit;
             set => this.hasInit = value;
@@ -49,6 +50,7 @@ namespace MenschensKinder
                 {
                     figures.Add(i, new Figure(color));
                     Figure figure = ReturnFigure(i);
+                    figure.StartCoordinate = coordinate[i - 1];
                     figure.FigureCoordinate = coordinate[i - 1];
                 }
             }

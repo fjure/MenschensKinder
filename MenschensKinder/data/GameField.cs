@@ -1,6 +1,7 @@
 ﻿using MenschensKinder.data;
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace MenschensKinder
@@ -11,17 +12,10 @@ namespace MenschensKinder
     class GameField
     {
         public Coordinate2D Coordinates { get; set; }
-        public GameFieldType FieldType
-        {
-            get => DetermineGameFieldType(this.Coordinates);
-        }
-        public bool IsTaken
-        {
-            get;
-            set;
-        }
+        public GameFieldType FieldType { get => DetermineGameFieldType(this.Coordinates); }
+        public bool IsTaken { get; set; }
         public SolidColorBrush Color { get; set; }
-        public Visibility IsVisible { get; set; }
+        public bool IsVisible { get; set; }
 
 
         /// <summary>
@@ -34,7 +28,7 @@ namespace MenschensKinder
             // Weise der Coordinates Eigenschaft einen Wert mit den Parametern zu.
             Coordinates = new Coordinate2D(x, y);
             Color = color;
-            IsVisible = visible;
+            IsVisible = (bool)new BooleanToVisibilityConverter().ConvertBack(visible, null, null, null);
         }
 
         /// <summary>

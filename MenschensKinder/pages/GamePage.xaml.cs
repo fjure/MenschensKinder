@@ -38,10 +38,10 @@ namespace MenschensKinder
         {
             InitializeComponent();
             // Instanziiere Objekte
-            boardManager = new GameBoard();
             player = new Player(color);
             kiplayer = new List<Player>();
             allPlayers = new List<Player>();
+            boardManager = new GameBoard(allPlayers);
             // Zeichne die UI-Elemente
             InitGameboard();
             DrawPlayer();
@@ -115,11 +115,15 @@ namespace MenschensKinder
                 MessageBox.Show("Neue Position ist nicht berechenbar!");
             }
 
-            foreach (Figure figures in player.ReturnFigures())
+            foreach(Player player in allPlayers)
             {
-                grid.Children.Remove(figures.FigureButton);
-                DrawButtonForFigure(figures);
+                foreach (Figure figures in player.ReturnFigures())
+                {
+                    grid.Children.Remove(figures.FigureButton);
+                    DrawButtonForFigure(figures);
+                }
             }
+            
         }
 
         /// <summary>

@@ -16,6 +16,7 @@ namespace MenschensKinder
     /// </summary>
     class Figure
     {
+        public Coordinate2D StartCoordinate { get; set; }
         public Coordinate2D FigureCoordinate { get; set; }
         public PlayerColor Color { get; set; }
         public string HexColor { get; set; }

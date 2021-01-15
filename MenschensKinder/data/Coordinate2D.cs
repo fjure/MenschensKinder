@@ -35,5 +35,23 @@ namespace MenschensKinder
             return String.Format("X: {0}, Y: {1}", X.ToString(), Y.ToString());
         }
 
+        public override bool Equals(object obj)
+        {
+            Coordinate2D coordinate = (Coordinate2D)obj;
+            if (coordinate != null)
+            {
+                if (this.X != coordinate.X || this.Y != coordinate.Y)
+                    return false;
+                else
+                    return true;
+            }
+            else
+                return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
