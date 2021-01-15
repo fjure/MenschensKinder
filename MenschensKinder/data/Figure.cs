@@ -25,7 +25,7 @@ namespace MenschensKinder
         public GameField LastGameField { get; set; }
         public GameField CurrentGameField { get; set; }
 
-        public event EventHandler<bool> FigureClickedEvent;
+        public event EventHandler<EventArgs> FigureClickedEvent;
 
         /// <summary>
         /// Konstruiere ein ImageDrawing abhängig von der übergebenen Farbe.
@@ -102,7 +102,7 @@ namespace MenschensKinder
             // TODO: Anhand der ausgewählten Figur entscheiden, welche Figur bewegt wird
             //this.FigureCoordinate = DetermineNextPosition(this);
             //MessageBox.Show(this.FigureCoordinate.ToString());
-            FigureClickedEvent?.Invoke(this, true);
+            FigureClickedEvent?.Invoke(this, EventArgs.Empty);
         }
 
     }

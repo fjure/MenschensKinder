@@ -1,6 +1,7 @@
 ﻿using MenschensKinder.data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,6 +29,7 @@ namespace MenschensKinder
         private readonly List<Player> allPlayers;
         // Würfel Button
         private Button diceButton;
+        private readonly BackgroundWorker worker;
         
 
         /// <summary>
@@ -38,15 +40,21 @@ namespace MenschensKinder
         {
             InitializeComponent();
             // Instanziiere Objekte
+            worker = new BackgroundWorker();
+
             player = new Player(color);
             kiplayer = new List<Player>();
             allPlayers = new List<Player>();
             boardManager = new GameBoard(allPlayers);
+            
             // Zeichne die UI-Elemente
             InitGameboard();
-            DrawPlayer();
-            DrawKI();
+            InitPlayers();
+            //DrawPlayer();
+            //DrawKI();
             GameLoop();
+            worker.DoWork += new Game(allPlayers, boardManager).Start;
+            worker.RunWorkerAsync();
 #if DEBUG
             Coordinate2D coordinates = boardManager.ReturnPosition(ellipses.LastOrDefault());
 #endif
@@ -54,11 +62,11 @@ namespace MenschensKinder
 
         private void GameLoop()
         {
-            allPlayers.Add(player);
-            foreach(Player ki in kiplayer)
+            //allPlayers.Add(player);
+            /*foreach(Player ki in kiplayer)
             {
                 allPlayers.Add(ki);
-            }
+            }*/
 
             foreach(Player players in allPlayers)
             {
@@ -89,7 +97,7 @@ namespace MenschensKinder
             }
         }
 
-        public void OnFigureClicked(Object sender, bool test)
+        public void OnFigureClicked(Object sender, EventArgs e)
         {
             Figure figSend = (Figure)sender;
             
@@ -137,53 +145,34 @@ namespace MenschensKinder
             foreach (Ellipse ellipse in ellipses)
                 grid.Children.Add(ellipse);   
         }
-        /// <summary>
-        /// Sorgt dafür, den Spieler an seiner Erstposition zu zeichnen.
-        /// </summary>
-        private void DrawPlayer()
-        {
-            // Überprüfe ob der Spieler schon initialisiert wurde, sprich schon gezeichnet wurde. Falls dies schon der Fall ist, überspringe.
-            if(!player.IsInit)
-            {
-                // Speichere alle Figuren des Player Objektes und iteriere durch diese
-                var figures = player.ReturnFigures();
-                foreach(Figure figure in figures)
-                {
-                    DrawButtonForFigure(figure);
-                    figure.CurrentGameField = boardManager.ReturnField(figure.FigureCoordinate);
-                    figure.LastGameField = figure.CurrentGameField;
-                }
-            }
-            // Debug-Anweisung
-            else
-            {
-                MessageBox.Show("Wurde schon geplaced");
-            }
-        }
 
-        /// <summary>
-        /// Sorgt dafür, die KISpieler an ihrer Erstposition zu zeichnen.
-        /// </summary>
-        private void DrawKI()
+        private void InitPlayers()
         {
-            // Iteriere durch jede einzelne verfügbare Spielerfarbe
-            foreach (PlayerColor colors in Enum.GetValues(typeof(PlayerColor)))
+            allPlayers.Add(player);
+            foreach (Figure figure in player.ReturnFigures())
             {
-                // Füge anhand der vom Spieler gewählten Farbe alle anderen Farben als KIPlayer hinzu
-                if (colors != player.Color)
-                {
-                    kiplayer.Add(new Player(colors));
-                }
+                DrawButtonForFigure(figure);
+                figure.CurrentGameField = boardManager.ReturnField(figure.FigureCoordinate);
+                figure.LastGameField = figure.CurrentGameField;
             }
-            // Zeichne für jeden Spieler seine 4 Figuren
-            foreach (Player ki in kiplayer)
+
+            foreach(PlayerColor colors in Enum.GetValues(typeof(PlayerColor)))
             {
-                var figures = ki.ReturnFigures();
-                foreach (Figure kifigure in figures)
+                if (colors != player.Color)
+                    kiplayer.Add(new Player(colors));
+            }
+            foreach(Player ki in kiplayer)
+            {
+                allPlayers.Add(ki);
+                foreach(Figure kifigure in ki.ReturnFigures())
                 {
                     DrawButtonForFigure(kifigure);
+                    kifigure.CurrentGameField = boardManager.ReturnField(kifigure.FigureCoordinate);
+                    kifigure.LastGameField = kifigure.CurrentGameField;
                 }
             }
+            
+            
         }
 
         /// <summary>

@@ -91,6 +91,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="data\GameFieldType.cs" />
+    <Compile Include="data\Game.cs" />
     <Compile Include="data\PlayerColor.cs" />
     <Compile Include="pages\ColorPage.xaml.cs">
       <DependentUpon>ColorPage.xaml</DependentUpon>
