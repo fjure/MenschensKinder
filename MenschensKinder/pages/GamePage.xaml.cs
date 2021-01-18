@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -30,6 +31,9 @@ namespace MenschensKinder
         // Würfel Button
         private Button diceButton;
         private readonly BackgroundWorker worker;
+
+        public TaskCompletionSource<object> figureChosen;
+
         
 
         /// <summary>
@@ -47,92 +51,28 @@ namespace MenschensKinder
             allPlayers = new List<Player>();
             boardManager = new GameBoard(allPlayers);
             
+            
             // Zeichne die UI-Elemente
             InitGameboard();
             InitPlayers();
             //DrawPlayer();
             //DrawKI();
-            GameLoop();
-            worker.DoWork += new Game(allPlayers, boardManager).Start;
+            //GameLoop();
+            Game game = new Game(allPlayers, boardManager, this);
+            worker.DoWork += game.Start;
+            //game.KiClickedFigureEvent += OnKiClickedFigure;
             worker.RunWorkerAsync();
 #if DEBUG
             Coordinate2D coordinates = boardManager.ReturnPosition(ellipses.LastOrDefault());
 #endif
         }
 
-        private void GameLoop()
+        public void OnKiClickedFigure(object sender, EventArgs e)
         {
-            //allPlayers.Add(player);
-            /*foreach(Player ki in kiplayer)
-            {
-                allPlayers.Add(ki);
-            }*/
-
-            foreach(Player players in allPlayers)
-            {
-                foreach(Figure figure in players.ReturnFigures())
-                {
-                    figure.FigureClickedEvent += OnFigureClicked;
-                }
-            }
-            boardManager.DiceRolledEvent += OnDiceRolled;
-            
+            MessageBox.Show("Eine KI hat gewählT!");
         }
 
-        public void OnDiceRolled()
-        {
-            int leftTurns = player.Turns;
-            //MessageBox.Show(leftTurns.ToString());
-            if (leftTurns > 1)
-            {
-                if(boardManager.RolledDice == 6)
-                {
-                    player.EnableFigures();
-                }
-                //player.Turns -= 1;
-            }
-            else
-            {
-                //diceButton.IsEnabled = false;
-            }
-        }
 
-        public void OnFigureClicked(Object sender, EventArgs e)
-        {
-            Figure figSend = (Figure)sender;
-            
-            GameField currentField = boardManager.ReturnField(figSend.FigureCoordinate);
-            
-            GameField newField = boardManager.DetermineNextField(figSend, currentField);
-
-            figSend.LastGameField = currentField;
-            figSend.CurrentGameField = newField;
-#if DEBUG
-            /*MessageBox.Show("Clicked on: " + figSend.FigureCoordinate.ToString());
-            MessageBox.Show("Aktuelles Feld Posi: " + currentField.Coordinates.ToString());
-            MessageBox.Show("Neues berechnetes Feld: " + newField.Coordinates.ToString());
-            MessageBox.Show("Ich stand auf: " + figSend.LastGameField.Coordinates.ToString());
-            MessageBox.Show("Jetzt stehe ich auf: " + figSend.CurrentGameField.Coordinates.ToString());*/
-#endif
-            try
-            {
-                figSend.FigureCoordinate = newField.Coordinates;
-            } 
-            catch(ArgumentNullException)
-            {
-                MessageBox.Show("Neue Position ist nicht berechenbar!");
-            }
-
-            foreach(Player player in allPlayers)
-            {
-                foreach (Figure figures in player.ReturnFigures())
-                {
-                    grid.Children.Remove(figures.FigureButton);
-                    DrawButtonForFigure(figures);
-                }
-            }
-            
-        }
 
         /// <summary>
         /// Initialisere das Spielbrett. Sprich alle Ellipsen werden gezeichnet und der Würfel Button erzeugt.
@@ -145,6 +85,8 @@ namespace MenschensKinder
             foreach (Ellipse ellipse in ellipses)
                 grid.Children.Add(ellipse);   
         }
+
+
 
         private void InitPlayers()
         {
@@ -179,7 +121,7 @@ namespace MenschensKinder
         /// Zeichnet den jeweiligen Button an der Position der Player Figure
         /// </summary>
         /// <param name="figure">Die Figur für welche der Button gezeichnet werden soll</param>
-        private void DrawButtonForFigure(Figure figure)
+        public void DrawButtonForFigure(Figure figure)
         {
             Button figBtn = figure.FigureButton;
             Grid.SetColumn(figBtn, figure.FigureCoordinate.X);

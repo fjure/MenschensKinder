@@ -10,7 +10,7 @@ namespace MenschensKinder
     /// <summary>
     /// Util-Klasse um die Position des GameField besser verwalten zu können.
     /// </summary>
-    class Coordinate2D
+    public class Coordinate2D
     {
         public int X { get; }
         public int Y { get; }

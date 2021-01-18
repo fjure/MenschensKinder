@@ -14,7 +14,7 @@ namespace MenschensKinder
     /// <summary>
     /// Klasse um die Figuren des Player und der KIPlayer verwalten zu können. Enthält z.B. die Position der jeweiligen Figure, ihr ImageDrawing, und den Verweis auf das jeweilige Bild.
     /// </summary>
-    class Figure
+    public class Figure
     {
         public Coordinate2D StartCoordinate { get; set; }
         public Coordinate2D FigureCoordinate { get; set; }
@@ -24,6 +24,7 @@ namespace MenschensKinder
         public Button FigureButton { get; }
         public GameField LastGameField { get; set; }
         public GameField CurrentGameField { get; set; }
+        public List<GameField> FieldsAround { get; set; }
 
         public event EventHandler<EventArgs> FigureClickedEvent;
 
@@ -44,6 +45,14 @@ namespace MenschensKinder
                 Style = figureBtnStyle,
             };
             FigureButton.Click += FigureClicked;
+        }
+
+        public void DisableFigure()
+        {
+            if(FigureButton != null)
+            {
+                FigureButton.IsEnabled = false;
+            }
         }
 
         /// <summary>

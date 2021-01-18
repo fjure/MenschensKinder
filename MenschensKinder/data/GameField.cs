@@ -9,7 +9,7 @@ namespace MenschensKinder
     /// <summary>
     /// Die Klasse GameField enthält Logik Eigenschaften um die UI-Ellipse mit Logik zu füllen
     /// </summary>
-    class GameField
+    public class GameField
     {
         public Coordinate2D Coordinates { get; set; }
         public GameFieldType FieldType { get => DetermineGameFieldType(this.Coordinates); }
@@ -101,8 +101,8 @@ namespace MenschensKinder
         /// <returns>Formatierten String mit den GameField Eigenschaften</returns>
         public override string ToString()
         {
-            return String.Format("{0},{1}", Coordinates.ToString(), IsTaken.ToString());
-            //return String.Format("{0}", IsVisible.ToString());
+            //return String.Format("{0},{1}", Coordinates.ToString(), IsTaken.ToString());
+            return String.Format("{0}", IsTaken.ToString());
         }
 
         

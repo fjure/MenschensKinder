@@ -15,10 +15,11 @@ namespace MenschensKinder
     {
         private bool hasInit;
 
+        public int Order { get; set; }
         public PlayerColor Color { get; }
         // Dictionary um jeder Integer ID einer Figure zuzordnen. (1 -> Figure1, 2 -> Figure2, usw.)
         private readonly IDictionary<int, Figure> figures = new Dictionary<int, Figure>();
-        public List<Coordinate2D> StartCoordinates { get => DetermineStartCoordinatesByColor(this.Color); } 
+        public List<Coordinate2D> StartCoordinates { get => DetermineStartCoordinatesByColor(Color); } 
         public bool IsInit {
             get => this.hasInit;
             set => this.hasInit = value;

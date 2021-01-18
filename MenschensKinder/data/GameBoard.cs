@@ -16,7 +16,7 @@ namespace MenschensKinder
         private readonly IDictionary<Ellipse, GameField> gameField = new Dictionary<Ellipse, GameField>();
         private readonly List<Player> allPlayer;
 
-        public event Action DiceRolledEvent;
+        public event EventHandler<EventArgs> DiceRolledEvent;
 
         private int rolledDice = 0;
         public int RolledDice
@@ -97,27 +97,30 @@ namespace MenschensKinder
             return null;
         }
 
-        private bool CanKick(Figure kicker, GameField field)
+        public bool CanKick(Figure kicker, GameField field, bool kickEnabled)
         {
-            if (field.IsTaken)
+            //MessageBox.Show(kickEnabled.ToString());
+            if (field.IsTaken && kickEnabled)
             {
+                //MessageBox.Show("ICH KANN KICKEN!");
                 Figure figureOnField = ReturnFigureForGameField(field);
                 if(figureOnField.FigureCoordinate.Equals(field.Coordinates))
                 {
                     return true;
                 }
             }
+            //MessageBox.Show("Kein Kick gefunden!");
             return false;     
         }
 
-        private void Kick(Figure kicker, Figure figureOnField ,GameField field)
+        public void Kick(Figure kicker, Figure figureOnField ,GameField field)
         {
             figureOnField.FigureCoordinate = figureOnField.StartCoordinate;
             kicker.FigureCoordinate = field.Coordinates;
             kicker.CurrentGameField = field;
         }
 
-        private Figure ReturnFigureForGameField(GameField field)
+        public Figure ReturnFigureForGameField(GameField field)
         {
             foreach(Player player in allPlayer)
             {
@@ -132,19 +135,21 @@ namespace MenschensKinder
             return null;
         }
 
-        public GameField DetermineNextField(Figure figure, GameField currentField)
+        public GameField DetermineNextField(Figure figure, GameField currentField, bool kickEnabled)
         {
             GameField nextField = currentField;
-            List<GameField> fieldsAround = ScanFieldsAround(figure);
+            //List<GameField> fieldsAround = ScanFieldsAround(figure);
+            figure.FieldsAround = ScanFieldsAround(figure);
+            List<GameField> fieldsAround = figure.FieldsAround;
             if (currentField.FieldType == GameFieldType.HOUSE)
             {
                 foreach (GameField allFields in gameField.Values)
                 {
                     if (allFields.Color.ToString().Equals(figure.HexColor) && allFields.FieldType == GameFieldType.STARTFIELD)
                     {
-                        if(allFields.IsTaken)
+                        if(allFields.IsTaken && kickEnabled)
                         {
-                            if(CanKick(figure, allFields))
+                            if (CanKick(figure, allFields, false))
                             {
                                 Kick(figure, ReturnFigureForGameField(allFields), allFields);
                             }
@@ -180,7 +185,7 @@ namespace MenschensKinder
                         && (fields.FieldType != GameFieldType.ENDFIELD && fields.FieldType != GameFieldType.BANK)
                         && fields.IsVisible)
                         {
-                            if (CanKick(figure, fields))
+                            if (CanKick(figure, fields, kickEnabled))
                             {
                                 Kick(figure, ReturnFigureForGameField(fields), fields);
                             }
@@ -193,7 +198,7 @@ namespace MenschensKinder
                         && (fields.FieldType != GameFieldType.HOUSE && fields.FieldType != GameFieldType.BANK)
                         && fields.IsVisible)
                         {
-                            if(CanKick(figure, fields))
+                            if (CanKick(figure, fields, kickEnabled))
                             {
                                 Kick(figure, ReturnFigureForGameField(fields), fields);
                             }
@@ -204,7 +209,7 @@ namespace MenschensKinder
                     {
                         if (fields.Color.ToString().Equals(figure.HexColor) && fields.FieldType == GameFieldType.BANK)
                         {
-                            if (CanKick(figure, fields))
+                            if (CanKick(figure, fields, kickEnabled))
                             {
                                 Kick(figure, ReturnFigureForGameField(fields), fields);
                             }
@@ -217,7 +222,7 @@ namespace MenschensKinder
                             && (fields.FieldType == GameFieldType.STARTFIELD && !fields.Color.ToString().Equals(figure.HexColor))
                             && fields.IsVisible)
                             {
-                                if (CanKick(figure, fields))
+                                if (CanKick(figure, fields, kickEnabled))
                                 {
                                     Kick(figure, ReturnFigureForGameField(fields), fields);
                                 }
@@ -260,7 +265,7 @@ namespace MenschensKinder
         internal void RollDice(object sender, RoutedEventArgs e)
         {
             RolledDice = GetRolledDice();
-            DiceRolledEvent?.Invoke();
+            DiceRolledEvent?.Invoke(sender, e);
         }
 
         private int GetRolledDice()
@@ -270,10 +275,10 @@ namespace MenschensKinder
             int dice = rand.Next(1, 7);
 
             // Überprüfe ob die Würfel-Ergebnisse gleich sind.
-            if (dice == 6)
+            /*if (dice == 6)
                 MessageBox.Show(String.Format("Würfel: {0}, 6!", dice.ToString()));
             else
-                MessageBox.Show(String.Format("Würfel: {0}", dice.ToString()));
+                MessageBox.Show(String.Format("Würfel: {0}", dice.ToString()));*/
             return dice;
         }
     }
